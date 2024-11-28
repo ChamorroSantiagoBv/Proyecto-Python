@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import psutil
 import time
 from threading import Thread
@@ -65,6 +65,31 @@ def cerrar_ventana():
     ejecutar_hilo = False  # Detener el hilo
     ventana.destroy()  # Cerrar la ventana
 
+# Función para alternar el monitoreo de la CPU
+def alternar_monitoreo():
+    global ejecutar_hilo, hilo
+    if ejecutar_hilo:
+        ejecutar_hilo = False
+        btn_toggle.config(text="Iniciar Monitoreo")
+    else:
+        ejecutar_hilo = True
+        hilo = Thread(target=actualizar_cpu)
+        hilo.daemon = True
+        hilo.start()
+        btn_toggle.config(text="Detener Monitoreo")
+
+# Función para mostrar la ventana de ayuda
+def mostrar_ayuda():
+    mensaje = (
+        "Esta aplicación permite monitorear el uso del CPU en tiempo real.\n\n"
+        "Instrucciones:\n"
+        "- Usa el botón 'Iniciar Monitoreo' para comenzar a visualizar el uso del CPU.\n"
+        "- Usa el botón 'Detener Monitoreo' para detener la actualización.\n"
+        "- Los datos se guardan en un archivo de registro especificado en el archivo de configuración.\n"
+        "- El gráfico muestra los últimos 60 segundos del uso del CPU."
+    )
+    messagebox.showinfo("Ayuda", mensaje)
+
 # Crear la ventana principal
 ventana = tk.Tk()
 ventana.title("Monitoreo de CPU")
@@ -93,6 +118,14 @@ ax.legend()
 # Añadir el gráfico a la interfaz de Tkinter
 canvas = FigureCanvasTkAgg(fig, master=ventana)
 canvas.get_tk_widget().pack()
+
+# Crear el botón para iniciar/detener el monitoreo
+btn_toggle = ttk.Button(ventana, text="Detener Monitoreo", command=alternar_monitoreo)
+btn_toggle.pack(pady=10)
+
+# Crear el botón de ayuda
+btn_help = ttk.Button(ventana, text="Ayuda", command=mostrar_ayuda)
+btn_help.pack(pady=10)
 
 # Variable global para controlar el hilo
 ejecutar_hilo = True
